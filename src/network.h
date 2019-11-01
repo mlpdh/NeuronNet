@@ -79,14 +79,14 @@ public:
   \param n : the index of the receiving neuron.
   \return a pair {number of connections, sum of link intensities}.
  */
-    std::pair<size_t, double> degree(const size_t&) const;
+    std::pair<size_t, double> degree(const size_t&) const; //
     const Neuron& neuron(const size_t n) const {return neurons.at(n);}
 /*! 
   Finds the list of neurons with incoming connections to \p n.
   \param n : the index of the receiving neuron.
   \return a vector of pairs {neuron index, link intensity}.
  */
-    std::vector<std::pair<size_t, double> > neighbors(const size_t&) const;
+    std::vector<std::pair<size_t, double> > neighbors(const size_t&) const;//
     std::vector<double> potentials() const;
     std::vector<double> recoveries() const;
 /*! 
@@ -94,7 +94,7 @@ public:
   \param input : a vector of random values as thalamic input, one value for each neuron. The variance of these values corresponds to excitatory neurons.
   \return the indices of firing neurons.
  */
-    std::set<size_t> step(const std::vector<double>&);
+    std::set<size_t> step(const std::vector<double>&);//
     void print_params(std::ostream *_out=&std::cout);
     void print_traj(const int, const std::map<std::string, size_t>&, 
                     std::ostream *_out=&std::cout);

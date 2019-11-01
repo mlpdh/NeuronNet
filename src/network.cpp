@@ -62,6 +62,59 @@ size_t Network::random_connect(const double &mean_deg, const double &mean_streng
     return num_links;
 }
 
+std::pair<size_t, double> Network::degree(const size_t& n) const { //perso
+
+	size_t s(size());
+	
+	size_t connections(0);
+	double intensity(0);
+	
+	for (size_t i(0); i<s; ++i) {
+		
+		auto search (links.find({n, i}));
+		
+		if (search != links.end()) {
+			
+			++ connections;
+			
+			intensity += search->second ;
+		}
+	}
+	
+	return {connections, intensity};
+}
+
+std::vector<std::pair<size_t, double>> Network::neighbors(const size_t& n) const { //perso
+
+	std::vector<std::pair<size_t, double>> retour;
+	
+	auto search = links.lower_bound({n, 0}); 
+	
+	while (search->first.first == n and search != links.end()) {
+			
+		retour.push_back({search->first.second , search->second});	
+		
+		search = links.lower_bound({n,1 + search->first.second}); 
+		
+		}
+	
+	/*size_t a(size());
+	
+	std::vector<std::pair<size_t, double>> retour;
+	
+	for (size_t i(0); i<a; ++i) {
+		
+		auto search (links.find({n, i})); 
+		
+		if (search != links.end())
+			
+			retour.push_back({i,search->second});
+		
+		}*/
+		
+	return retour;
+}
+
 std::vector<double> Network::potentials() const {
     std::vector<double> vals;
     for (size_t nn=0; nn<size(); nn++)
@@ -74,6 +127,52 @@ std::vector<double> Network::recoveries() const {
     for (size_t nn=0; nn<size(); nn++)
         vals.push_back(neurons[nn].recovery());
     return vals;
+}
+
+std::set<size_t> Network::step(const std::vector<double>& th_noise) { // perso
+								
+	std::set<size_t> retour;
+	
+	size_t s(size());
+	
+	for (size_t i(0); i<s; ++i) {
+	
+		if (not neurons[i].firing()) {
+	
+			double InPut(0);
+			
+			for(const auto& x : neighbors(i)) { 
+				
+				if (neurons[x.first].firing()) {
+					
+				if (neurons[x.first].is_inhibitory())
+					{InPut += (x.second);} 
+					
+				else
+					{InPut += (0.5 * x.second);} 
+				}
+			}
+		
+			if (neurons[i].is_inhibitory())		
+				{neurons[i].input(InPut + th_noise[i]*2/5);}
+			
+			else 
+				{neurons[i].input(InPut + th_noise[i]);}	
+				
+		}
+	}	
+
+	for (size_t i(0); i<s; ++i) {	
+		
+		if (neurons[i].firing()){
+			retour.insert(i);
+			neurons[i].reset();
+		}
+		else 
+			{neurons[i].step();}
+	}
+	
+	return retour;
 }
 
 void Network::print_params(std::ostream *_out) {
